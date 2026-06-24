@@ -73,7 +73,8 @@ st.markdown(
 # ---------------------------------------------------------------------------
 st.markdown('<p class="main-title">📊 XLcomparator</p>', unsafe_allow_html=True)
 st.markdown(
-    '<p class="sub-title">Comparez deux fichiers Excel et exportez les différences</p>',
+    '<p class="sub-title">Comparez deux fichiers Excel'
+    ' et exportez les différences</p>',
     unsafe_allow_html=True,
 )
 
@@ -85,7 +86,10 @@ st.divider()
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown('<p class="section-header">📁 Fichier de référence</p>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="section-header">📁 Fichier de référence</p>',
+        unsafe_allow_html=True,
+    )
     ref_file = st.file_uploader(
         "Choisissez le fichier de référence",
         type=["xls", "xlsx"],
@@ -96,7 +100,10 @@ with col1:
         st.success(f"✔ **{ref_file.name}** chargé ({ref_file.size:,} octets)")
 
 with col2:
-    st.markdown('<p class="section-header">📂 Fichier à comparer</p>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="section-header">📂 Fichier à comparer</p>',
+        unsafe_allow_html=True,
+    )
     cmp_file = st.file_uploader(
         "Choisissez le fichier à comparer",
         type=["xls", "xlsx"],
@@ -112,7 +119,11 @@ st.divider()
 # Comparison
 # ---------------------------------------------------------------------------
 if ref_file and cmp_file:
-    if st.button("🔍 Lancer la comparaison", use_container_width=True, type="primary"):
+    if st.button(
+        "🔍 Lancer la comparaison",
+        use_container_width=True,
+        type="primary",
+    ):
         with st.spinner("Comparaison en cours…"):
             try:
                 differences = compare_workbooks(ref_file, cmp_file)
@@ -123,9 +134,15 @@ if ref_file and cmp_file:
                 st.error(f"Erreur lors de la comparaison : {exc}")
                 st.session_state.pop("differences", None)
 elif ref_file or cmp_file:
-    st.info("⬆ Veuillez charger les **deux fichiers** pour lancer la comparaison.")
+    st.info(
+        "⬆ Veuillez charger les **deux fichiers**"
+        " pour lancer la comparaison."
+    )
 else:
-    st.info("⬆ Chargez un fichier de référence et un fichier à comparer pour commencer.")
+    st.info(
+        "⬆ Chargez un fichier de référence"
+        " et un fichier à comparer pour commencer."
+    )
 
 # ---------------------------------------------------------------------------
 # Results display
@@ -139,18 +156,23 @@ if "differences" in st.session_state:
 
     if not differences:
         st.markdown(
-            '<p class="diff-count-ok">✅ Les deux fichiers sont identiques — aucune différence trouvée.</p>',
+            '<p class="diff-count-ok">✅ Les deux fichiers sont identiques'
+            ' — aucune différence trouvée.</p>',
             unsafe_allow_html=True,
         )
     else:
         st.markdown(
-            f'<p class="diff-count-warn">⚠️ {len(differences)} différence(s) trouvée(s) '
+            f'<p class="diff-count-warn">⚠️ {len(differences)}'
+            f' différence(s) trouvée(s) '
             f'entre <b>{ref_name}</b> et <b>{cmp_name}</b></p>',
             unsafe_allow_html=True,
         )
 
         df = differences_to_dataframe(differences)
-        df.columns = ["Feuille", "Ligne", "Colonne", "Valeur référence", "Valeur comparée"]
+        df.columns = [
+            "Feuille", "Ligne", "Colonne",
+            "Valeur référence", "Valeur comparée",
+        ]
 
         # Optional sheet filter
         sheets = sorted(df["Feuille"].unique().tolist())
@@ -191,7 +213,10 @@ if "differences" in st.session_state:
                 label="📝 Télécharger en DOCX",
                 data=docx_bytes,
                 file_name="differences.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                mime=(
+                    "application/vnd.openxmlformats-officedocument"
+                    ".wordprocessingml.document"
+                ),
                 use_container_width=True,
             )
             st.caption("Rapport Word (.docx)")
@@ -202,7 +227,10 @@ if "differences" in st.session_state:
                 label="📊 Télécharger en XLSX",
                 data=xlsx_bytes,
                 file_name="differences.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                mime=(
+                    "application/vnd.openxmlformats-officedocument"
+                    ".spreadsheetml.sheet"
+                ),
                 use_container_width=True,
             )
             st.caption("Tableau Excel (.xlsx)")
@@ -213,7 +241,8 @@ if "differences" in st.session_state:
 st.divider()
 st.markdown(
     "<p style='text-align:center; color:#6c757d; font-size:0.85rem;'>"
-    "XLcomparator — Comparez, analysez, exportez vos fichiers Excel en toute simplicité."
+    "XLcomparator — Comparez, analysez, exportez"
+    " vos fichiers Excel en toute simplicité."
     "</p>",
     unsafe_allow_html=True,
 )

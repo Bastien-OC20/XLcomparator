@@ -1,3 +1,6 @@
+# Claude Code
+.claude/
+
 # Python / Streamlit
 .streamlit/secrets.toml
 venv/

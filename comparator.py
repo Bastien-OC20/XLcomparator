@@ -22,7 +22,8 @@ def _read_workbook(file_obj) -> Dict[str, pd.DataFrame]:
     for name in xl.sheet_names:
         df = xl.parse(name, header=None, dtype=str)
         df = df.fillna("")
-        sheets[name] = df
+        df.columns = list(range(len(df.columns)))
+        sheets[str(name)] = df
     return sheets
 
 
@@ -55,8 +56,12 @@ def compare_workbooks(ref_file, cmp_file) -> List[Dict[str, Any]]:
             cmp_df.shape[1] if not cmp_df.empty else 0,
         )
 
-        ref_df = ref_df.reindex(index=range(max_rows), columns=range(max_cols), fill_value="")
-        cmp_df = cmp_df.reindex(index=range(max_rows), columns=range(max_cols), fill_value="")
+        ref_df = ref_df.reindex(
+            index=range(max_rows), columns=range(max_cols), fill_value=""
+        )
+        cmp_df = cmp_df.reindex(
+            index=range(max_rows), columns=range(max_cols), fill_value=""
+        )
 
         for row_idx in range(max_rows):
             for col_idx in range(max_cols):
@@ -82,7 +87,9 @@ def compare_workbooks(ref_file, cmp_file) -> List[Dict[str, Any]]:
 # ---------------------------------------------------------------------------
 
 
-def differences_to_dataframe(differences: List[Dict[str, Any]]) -> pd.DataFrame:
+def differences_to_dataframe(
+    differences: List[Dict[str, Any]]
+) -> pd.DataFrame:
     """Convert the list of differences to a pandas DataFrame."""
     if not differences:
         return pd.DataFrame(
@@ -92,7 +99,7 @@ def differences_to_dataframe(differences: List[Dict[str, Any]]) -> pd.DataFrame:
 
 
 def differences_to_xml(differences: List[Dict[str, Any]]) -> bytes:
-    """Serialise differences to an XML byte string suitable for DB injection."""
+    """Serialise differences to an XML byte string for DB injection."""
     root = ET.Element("differences")
 
     for diff in differences:
@@ -104,14 +111,19 @@ def differences_to_xml(differences: List[Dict[str, Any]]) -> bytes:
         ET.SubElement(elem, "valeur_cmp").text = str(diff["valeur_cmp"])
 
     raw = ET.tostring(root, encoding="unicode")
-    pretty = minidom.parseString(raw).toprettyxml(indent="  ", encoding="UTF-8")
+    pretty = minidom.parseString(raw).toprettyxml(
+        indent="  ", encoding="UTF-8"
+    )
     return pretty
 
 
 def differences_to_xlsx(differences: List[Dict[str, Any]]) -> bytes:
     """Serialise differences to an XLSX byte string."""
     df = differences_to_dataframe(differences)
-    df.columns = ["Feuille", "Ligne", "Colonne", "Valeur référence", "Valeur comparée"]
+    df.columns = [
+        "Feuille", "Ligne", "Colonne",
+        "Valeur référence", "Valeur comparée",
+    ]
 
     buf = io.BytesIO()
     with pd.ExcelWriter(buf, engine="openpyxl") as writer:
@@ -121,7 +133,8 @@ def differences_to_xlsx(differences: List[Dict[str, Any]]) -> bytes:
         worksheet = writer.sheets["Différences"]
         for col in worksheet.columns:
             max_length = max(len(str(cell.value or "")) for cell in col)
-            worksheet.column_dimensions[col[0].column_letter].width = max_length + 4
+            col_letter = col[0].column_letter
+            worksheet.column_dimensions[col_letter].width = max_length + 4
 
     return buf.getvalue()
 
@@ -139,12 +152,17 @@ def differences_to_docx(differences: List[Dict[str, Any]]) -> bytes:
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     if not differences:
-        doc.add_paragraph("Aucune différence trouvée entre les deux fichiers.")
+        doc.add_paragraph(
+            "Aucune différence trouvée entre les deux fichiers."
+        )
     else:
         doc.add_paragraph(f"Nombre total de différences : {len(differences)}")
         doc.add_paragraph("")
 
-        headers = ["Feuille", "Ligne", "Colonne", "Valeur référence", "Valeur comparée"]
+        headers = [
+            "Feuille", "Ligne", "Colonne",
+            "Valeur référence", "Valeur comparée",
+        ]
         table = doc.add_table(rows=1, cols=len(headers))
         table.style = "Table Grid"
 
@@ -156,7 +174,8 @@ def differences_to_docx(differences: List[Dict[str, Any]]) -> bytes:
             run.bold = True
             run.font.size = Pt(10)
             run.font.color.rgb = RGBColor(0xFF, 0xFF, 0xFF)
-            hdr_cells[i].paragraphs[0].paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            para_fmt = hdr_cells[i].paragraphs[0].paragraph_format
+            para_fmt.alignment = WD_ALIGN_PARAGRAPH.CENTER
             # Dark background via XML shading
             from docx.oxml.ns import qn
             from docx.oxml import OxmlElement
