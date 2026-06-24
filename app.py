@@ -76,15 +76,24 @@ st.markdown(
 # ---------------------------------------------------------------------------
 # Header
 # ---------------------------------------------------------------------------
-st.markdown(
-    '<p class="main-title">📊 XLcomparator</p>',
-    unsafe_allow_html=True,
-)
-st.markdown(
-    '<p class="sub-title">Comparez deux fichiers Excel'
-    ' et exportez les différences</p>',
-    unsafe_allow_html=True,
-)
+h_left, h_center, h_right = st.columns([2, 5, 2])
+
+with h_left:
+    st.image("logo.png", width=130)
+
+with h_center:
+    st.markdown(
+        '<p class="main-title">📊 XLcomparator</p>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<p class="sub-title">Comparez deux fichiers Excel'
+        ' et exportez les différences</p>',
+        unsafe_allow_html=True,
+    )
+
+with h_right:
+    st.image("LOL.jpg", width=130)
 
 st.divider()
 
